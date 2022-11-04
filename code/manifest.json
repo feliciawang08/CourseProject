@@ -7,7 +7,7 @@
     "permissions": ["activeTab"],
     "content_scripts": [
         {
-            "matches": ["https://*.wikipedia.org/*", "*.pdf"],
+            "matches": ["https://*.wikipedia.org/*"],
             "js": ["content.js"]
         }
     ],
