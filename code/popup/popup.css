@@ -1,6 +1,7 @@
 /* test code for now */
-.container {
-    width: 300px;
+.input {
+    width: 10rem;
+    height: 3rem;
     background-color: lavenderblush;
 }
 

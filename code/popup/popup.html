@@ -1,7 +1,21 @@
 <!-- HTML for extension popup will go here -->
-<link href="popup.css" rel="stylesheet" type="text/css"/>
+<link href="popup.css" rel="stylesheet" type="text/css" />
 <script type="module" src="popup.js"></script>
 
-<div class="container">
-    <div class="header">This is a test</div>
-</div>
+<form class="input" role="search" id="form">
+    <input type="search" id="query" placeholder="Search...">
+    <button>
+        submit
+    </button>
+</form>
+
+<table class="results">
+    <tr>
+        <td><span id="output1">
+            </span></td>
+    </tr>
+    <tr>
+        <td><span id="output2">
+            </span></td>
+    </tr>
+</table>
