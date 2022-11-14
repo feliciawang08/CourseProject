@@ -3,15 +3,21 @@
     "name": "BM25 Document Search",
     "version": "0.1.0",
     "description": "Use BM25 algorithm to search Wikipedia articles or PDFs based on user-inputted phrase.",
-
-    "permissions": ["activeTab", "scripting"],
+    "permissions": [
+        "activeTab",
+        "scripting"
+    ],
     "host_permissions": [
         "https://*.wikipedia.org/*"
-      ],
+    ],
     "content_scripts": [
         {
-            "matches": ["https://*.wikipedia.org/*"],
-            "js": ["content.js"]
+            "matches": [
+                "https://*.wikipedia.org/*"
+            ],
+            "js": [
+                "content.js"
+            ]
         }
     ],
     "action": {
