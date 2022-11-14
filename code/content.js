@@ -4,37 +4,43 @@ console.log("This page runs");
 class BM25 {
     constructor() {
         // instance variables for class will go in here
-        this.allPageText = ""
-        this.stemmedList = []
-
         this.paragraphs = [];
+        this.cleanedParagraphs = [];
+
         this.vocabulary = [];
         this.docFrequency = [];
     }
 
     /**
      * Filters out stopwords and stems resulting list from Wikipedia article paragraphs String
-     * @param {String of all Wikipedia article paragraphs} pageText 
+     * @param {Array containing strings of all Wikipedia article paragraphs} paras 
      */
-    cleanText(pageText) {
+    cleanText(paras) {
       // stopwords obtained from https://gist.github.com/sebleier/554280 (NLTK's list of english stopwords)
       var stopwords = ['i','me','my','myself','we','our','ours','ourselves','you','your','yours','yourself','yourselves','he','him','his','himself','she','her','hers','herself','it','its','itself','they','them','their','theirs','themselves','what','which','who','whom','this','that','these','those','am','is','are','was','were','be','been','being','have','has','had','having','do','does','did','doing','a','an','the','and','but','if','or','because','as','until','while','of','at','by','for','with','about','against','between','into','through','during','before','after','above','below','to','from','up','down','in','out','on','off','over','under','again','further','then','once','here','there','when','where','why','how','all','any','both','each','few','more','most','other','some','such','no','nor','not','only','own','same','so','than','too','very','s','t','can','will','just','don','should','now'];
-      var cleanedText = pageText.toLowerCase()
-                                .replace(/[\[0-9\]']+/g, "") // remove [#]
-                                .replace(/[^\w\s]/g, "") // remove punctuation
-                                .replace(/^\s+|\s+$|\s+(?=\s)/g, "") // remove whitespace
-                                .trim() // remove space from beginning and end
-                                .split(" ");
+      paras.forEach((paragraph, index) => {
+        paras[index] = paragraph.toLowerCase()
+                      .replace(/[\[0-9\]']+/g, "") // remove [#]
+                      .replace(/[^\w\s]/g, "") // remove punctuation
+                      .replace(/^\s+|\s+$|\s+(?=\s)/g, "") // remove whitespace
+                      .trim() // remove space from beginning and end
+                      .split(" ");
+      })
               
       // remove stopwords
-      cleanedText = cleanedText.filter(word => !stopwords.includes(word));
-      console.log(cleanedText);
+      paras.forEach((paragraph, index) => {
+        paras[index] = paragraph.filter(word => !stopwords.includes(word));
+      })
     
       // stem all filtered words
-      for (let i = 0; i < cleanedText.length; i++) {
-        this.stemmedList.push(this.stemmer(cleanedText[i]));
-      }
-      console.log(this.stemmedList);
+      paras.forEach((paragraph, pIndex) => {
+        paragraph.forEach((word, wIndex) => {
+          paras[pIndex[wIndex]] = this.stemmer(word);
+        })
+      })
+      this.cleanedParagraphs = paras;
+      console.log("We have the cleaned paragraphs");
+      console.log("CP len:", this.cleanedParagraphs);
     }
     
     /**
@@ -226,46 +232,28 @@ chrome.runtime.sendMessage({method: "set"}, () => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     chrome.scripting.executeScript({
       target: { tabId: tabs[0].id },
-      // function: getPageText
       function: getParagraphs
     }, () => {
       console.log("the url is", tabs[0].url)
       if (tabs[0].url.indexOf("wiki") == -1) {
         document.getElementById("id_text").value = "This extension can only be run on Wikipedia articles.";
       } else {
-        // chrome.runtime.sendMessage({method: "get"}, (response) => {
-        //   bm25_ranker.allPageText = response.value;
-        //   console.log("one para text:", bm25_ranker.allPageText);
-        //   bm25_ranker.cleanText(bm25_ranker.allPageText);
-        
         chrome.runtime.sendMessage({ method: "get" }, (response) => {
-          // BM25.allPageText = response.value;
-          BM25.paragraphs = response.value;
-          // console.log("one para text:", BM25.allPageText);
-          console.log(BM25.paragraphs)
+          bm25_ranker.paragraphs = response.value;
+          console.log("paragraphs:", bm25_ranker.paragraphs);
+          bm25_ranker.cleanText(bm25_ranker.paragraphs);
+          // console.log("cleaned paragraphs:". bm25_ranker.cleanedParagraphs);
+          // console.log("hahah paragraphs:", bm25_ranker.paragraphs);
+
           getVocabulary();
-          console.log(BM25.vocabulary);
+          console.log("vocabulary:", bm25_ranker.vocabulary);
           getDocFrequency();
-          console.log(BM25.docFrequency);
+          console.log("doc frequency:", bm25_ranker.docFrequency);
         });
       }
     });
   });
 });
-
-function getPageText() {
-  let paraCount = document.getElementsByTagName("p").length;
-  let allParagraphs = ""
-  let currPara = ""
-
-  for (let i = 0; i < paraCount; i++) {
-    currPara = document.getElementsByTagName("p")[i].innerText;
-    allParagraphs += currPara + "\n";
-  }
-
-  chrome.runtime.sendMessage({ method: "set", value: allParagraphs }, () => {
-  });
-}
 
 function getParagraphs() {
   let paraCount = document.getElementsByTagName("p").length;
@@ -281,26 +269,26 @@ function getParagraphs() {
 
 function getVocabulary() {
   var vocabSet = new Set();
-  BM25.paragraphs.forEach(doc => {
-    doc.split(' ').forEach(word => {
+  bm25_ranker.cleanedParagraphs.forEach(doc => {
+    doc.forEach(word => {
       vocabSet.add(word);
     })
   });
-  BM25.vocabulary = Array.from(vocabSet);
+  bm25_ranker.vocabulary = Array.from(vocabSet);
 }
 
 function getDocFrequency() {
   var tmp = [];
-  BM25.paragraphs.forEach(doc => {
+  bm25_ranker.cleanedParagraphs.forEach(doc => {
     var freq = []
-    BM25.vocabulary.forEach(term => {
+    bm25_ranker.vocabulary.forEach(term => {
       var count = 0;
-      doc.split(' ').forEach(word => {
+      doc.forEach(word => {
         if (term == word) count++;
       })
       freq.push(count);
     })
     tmp.push(freq);
   });
-  BM25.docFrequency = tmp;
+  bm25_ranker.docFrequency = tmp;
 }
