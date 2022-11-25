@@ -1,4 +1,5 @@
 // Functions used in popup will go here
+console.log("popup.js runs");
 
 function handleSubmit(event) {
     event.preventDefault();
