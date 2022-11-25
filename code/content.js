@@ -3,15 +3,12 @@ console.log("This page runs");
 
 class BM25 {
   constructor() {
-    // instance variables for class will go in here
-    this.paragraphs = [];
-    this.cleanedParagraphs = []; // all docs: d
-    this.numDocs = 0; // |d|
-    this.avgDocLength = 0; // avgdl
+      // instance variables for class will go in here
+      this.paragraphs = [];
+      this.cleanedParagraphs = [];
 
-    this.vocabulary = []; // all words: w
-    this.docFrequency = []; // c(w,d)
-    this.termDocFrequency = []; // df(w)
+      this.vocabulary = [];
+      this.docFrequency = [];
   }
 
   /**
@@ -41,7 +38,6 @@ class BM25 {
         paras[pIndex[wIndex]] = this.stemmer(word);
       })
     })
-    // set our final paragraphs
     this.cleanedParagraphs = paras;
     console.log("We have the cleaned paragraphs");
     console.log("CP len:", this.cleanedParagraphs);
@@ -227,7 +223,7 @@ class BM25 {
     
         return w;
     }
-  })();
+    })();
 }
 
 let bm25_ranker = new BM25();
@@ -246,14 +242,11 @@ chrome.runtime.sendMessage({method: "set"}, () => {
           bm25_ranker.paragraphs = response.value;
           console.log("paragraphs:", bm25_ranker.paragraphs);
           bm25_ranker.cleanText(bm25_ranker.paragraphs);
-          setupBM25DocInfo();
 
           getVocabulary();
           console.log("vocabulary:", bm25_ranker.vocabulary);
           getDocFrequency();
           console.log("doc frequency:", bm25_ranker.docFrequency);
-          getTermDocFrequency();
-          console.log("term doc frequency:", bm25_ranker.termDocFrequency);
         });
       }
     });
@@ -272,19 +265,6 @@ function getParagraphs() {
   });
 }
 
-function setupBM25DocInfo() {
-  bm25_ranker.numDocs = bm25_ranker.cleanedParagraphs.length;
-
-  var docLengths = [];
-  bm25_ranker.cleanedParagraphs.forEach(doc => {
-    docLengths.push(doc.length);
-  })
-
-  // bm25_ranker.avgDocLength = mean(docLengths);
-  var averageDocLength = docLengths.reduce((a, b) => a + b, 0) / docLengths.length;
-  bm25_ranker.avgDocLength = averageDocLength;
-}
-
 function getVocabulary() {
   var vocabSet = new Set();
   bm25_ranker.cleanedParagraphs.forEach(doc => {
@@ -295,9 +275,6 @@ function getVocabulary() {
   bm25_ranker.vocabulary = Array.from(vocabSet);
 }
 
-/**
- * To find c(w,d), do BM25.docFrequency[docIndex][wordIndex from vocabulary]
- */
 function getDocFrequency() {
   var tmp = [];
   bm25_ranker.cleanedParagraphs.forEach(doc => {
@@ -312,29 +289,4 @@ function getDocFrequency() {
     tmp.push(freq);
   });
   bm25_ranker.docFrequency = tmp;
-}
-
-/**
- * This calculates c(w,q), to be used in BM25
- */
-function getQueryTermFrequency(term, query) {
-  var freq = 0;
-  queryWords = query.split(' ');
-  queryWords.forEach(word => {
-    if (word == term) freq++;
-  })
-  return freq;
-}
-
-function getTermDocFrequency() {
-  var tmp = [];
-  docFreq = bm25_ranker.docFrequency;
-  for (let i = 0; i < bm25_ranker.vocabulary.length; i++) {
-    var termDocFreq = 0;
-    for (let j = 0; j < bm25_ranker.numDocs; j++) {
-      termDocFreq += docFreq[j][i];
-    }
-    tmp.push(termDocFreq);
-  }
-  bm25_ranker.termDocFrequency = tmp;
 }
