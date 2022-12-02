@@ -1,11 +1,17 @@
 /* test code for now */
-.input {
+/* .input {
     border-radius: 3px;
-}
+} */
 
 .results {
     font-size: 16px;
     padding: 5px;
+}
+
+.output {
+    border-color: black;
+    border: 20px;
+    background-color: gray;
 }
 
 tr {
@@ -16,4 +22,8 @@ body {
     width: 20rem;
     height: 3rem;
     background-color: rgb(255, 249, 251);
+}
+
+td :hover {
+    border-color: black;
 }

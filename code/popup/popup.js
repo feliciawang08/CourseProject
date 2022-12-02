@@ -27,7 +27,9 @@ function sendQuery(event) {
 
                     console.log(idxs);
                     document.getElementById("output1").textContent = paragraphs[idxs[0]];
-                    document.getElementById('o1').addEventListener('click', scrollOnPage);
+                    document.getElementById('output1').addEventListener('click', function () {
+                        scrollOnPage(idxs[0]);
+                    });
 
                     document.getElementById("output2").textContent = paragraphs[idxs[1]];
                 });
@@ -40,13 +42,14 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("submitButton").addEventListener("click", sendQuery);
 })
 
-function scrollOnPage() {
+function scrollOnPage(idx) {
     chrome.tabs.query(
         { currentWindow: true, active: true },
         function (tabs) {
             chrome.scripting.executeScript({
                 target: { tabId: tabs[0].id },
-                function: scrollToElement
+                function: scrollToElement,
+                args: [idx],
             });
         }
     );
@@ -67,10 +70,14 @@ function getParagraphs() {
     return paragraphs;
 }
 
-function scrollToElement(e) {
-    pageElement = document.getElementById("jump-to-nav")[0]
-    console.log(pageElement);
-    e.preventDefault();
-    pageElement.scrollIntoView();
+var index = 90909;
+
+function scrollToElement(idx) {
+    let pageElement = document.getElementsByTagName("p")[idx]
+    var y = pageElement.getBoundingClientRect().top + window.scrollY;
+    window.scroll({
+        top: y,
+        behavior: 'smooth'
+    });
 }
 

@@ -397,7 +397,3 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
   return true;
 })
-<<<<<<< HEAD
-=======
-
->>>>>>> 415c226175781dc912bc54b5a21d726caa62c398
