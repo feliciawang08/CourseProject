@@ -17,11 +17,18 @@ function sendQuery(event) {
             chrome.scripting.executeScript({
                 target: { tabId: tabs[0].id },
                 function: getParagraphs
-            }, (para) => {
+            }, (resp) => {
+                let paragraphs = resp[0].result;
                 console.log(query);
-                chrome.tabs.sendMessage(tabs[0].id, { "query": query, "tabs": tabs, "paragraphs": para[0].result }, function (response) {
-                    console.log(response.scores[0]);
-                    document.getElementById("output1").textContent = response.scores[0];
+                chrome.tabs.sendMessage(tabs[0].id, { "query": query, "tabs": tabs, "paragraphs": paragraphs }, function (response) {
+                    console.log(response.scores);
+
+                    var idxs = Array.from(Array(response.scores.length).keys())
+                        .sort((a, b) => response.scores[a] < response.scores[b] ? -1 : (response.scores[b] < response.scores[a]) | 0).reverse();
+
+                    console.log(idxs);
+                    document.getElementById("output1").textContent = paragraphs[idxs[0]];
+                    document.getElementById("output2").textContent = paragraphs[idxs[1]];
                 });
             });
         }

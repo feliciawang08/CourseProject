@@ -313,7 +313,7 @@ class BM25 {
    */
   getQueryTermFrequency(term, query) {
     var freq = 0;
-    queryWords = query.split(' ');
+    let queryWords = query.split(' ');
     queryWords.forEach(word => {
       if (word == term) freq++;
     })
@@ -341,10 +341,11 @@ class BM25 {
           var countWordDoc = this.docFrequency[i][wordVocabIndex]; // c(w,d)
           var dfw = this.termDocFrequency[wordVocabIndex]; // df(w)
 
-          bm25Score += countWordQuery * (((k + 1) * countWordDoc) / (countWordDoc + (k * (1 - b + ((b * docLen) / avgdl))))) * Math.log2((numDocs + 1) / dfw); // f(q,d)
+          bm25Score += countWordQuery * (((k + 1) * countWordDoc) / (countWordDoc + (k * (1 - b + ((b * docLen) / avgdl))))) * Math.log2((this.numDocs + 1) / dfw); // f(q,d)
         }
       }
     }
+    console.log(bm25Score);
     return bm25Score;
   }
 
@@ -390,6 +391,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     bm25_ranker.doBM25(msg.query, 0.75, 1.0);
     console.log(bm25_ranker.bm25Scores);
     sendResponse({ "scores": bm25_ranker.bm25Scores });
+    return true;
   }
   return true;
 })
