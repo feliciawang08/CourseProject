@@ -9,7 +9,7 @@ function handleSubmit(event) {
 document.getElementById('form').addEventListener('submit', handleSubmit);
 
 function sendQuery() {
-    var query = document.getElementById("query").vaue;
+    var query = document.getElementById("query").value;
     chrome.tabs.query(
         {currentWindow: true, active: true},
         function(tabs) {
@@ -18,4 +18,6 @@ function sendQuery() {
     )
 }
 
-document.getElementById("submitButton").addEventListener("click", sendQuery);
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("submitButton").addEventListener("click", sendQuery);
+})

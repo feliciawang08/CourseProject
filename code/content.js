@@ -393,11 +393,9 @@ chrome.runtime.sendMessage({method: "set"}, () => {
 /**
  * Listen for search button press from popup with query
  */
-chrome.runtime.onMessage.addListener(message => {
-    if (message.query) {
-        console.log("query");
-        bm25_ranker.doBM25(message.query, 0.75, 1.0);
-    }
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    console.log(msg);
+    bm25_ranker.doBM25(msg.query, 0.75, 1.0);
 })
 
 /**
