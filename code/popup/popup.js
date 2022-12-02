@@ -1,12 +1,11 @@
 // Functions used in popup will go here
 
-function handleSubmit(event) {
-    event.preventDefault();
-    document.getElementById("output1").textContent = document.getElementById("query").value[0];
-    document.getElementById("output2").textContent = document.getElementById("query").value.slice(1);
-}
+// function handleSubmit(event) {
+//     event.preventDefault();
+//     document.getElementById("output1").textContent = document.getElementById("query").value[0];
+//     document.getElementById("output2").textContent = document.getElementById("query").value.slice(1);
+// }
 
-// document.getElementById('form').addEventListener('submit', handleSubmit);
 
 function sendQuery(event) {
     event.preventDefault();
@@ -28,6 +27,8 @@ function sendQuery(event) {
 
                     console.log(idxs);
                     document.getElementById("output1").textContent = paragraphs[idxs[0]];
+                    document.getElementById('o1').addEventListener('click', scrollOnPage);
+
                     document.getElementById("output2").textContent = paragraphs[idxs[1]];
                 });
             });
@@ -39,6 +40,17 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("submitButton").addEventListener("click", sendQuery);
 })
 
+function scrollOnPage() {
+    chrome.tabs.query(
+        { currentWindow: true, active: true },
+        function (tabs) {
+            chrome.scripting.executeScript({
+                target: { tabId: tabs[0].id },
+                function: scrollToElement
+            });
+        }
+    );
+}
 
 /**
  * Each paragraph is a document. (M total documents, each document is 'd')
@@ -54,3 +66,11 @@ function getParagraphs() {
 
     return paragraphs;
 }
+
+function scrollToElement(e) {
+    pageElement = document.getElementById("jump-to-nav")[0]
+    console.log(pageElement);
+    e.preventDefault();
+    pageElement.scrollIntoView();
+}
+
