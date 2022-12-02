@@ -396,6 +396,8 @@ chrome.runtime.sendMessage({method: "set"}, () => {
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     console.log(msg);
     bm25_ranker.doBM25(msg.query, 0.75, 1.0);
+    sendResponse();
+    return true;
 })
 
 /**

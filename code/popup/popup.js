@@ -13,6 +13,7 @@ function sendQuery() {
     chrome.tabs.query(
         {currentWindow: true, active: true},
         function(tabs) {
+            console.log(query);
             chrome.tabs.sendMessage(tabs[0].id, {query: query});
         }
     )
