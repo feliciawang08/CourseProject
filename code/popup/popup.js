@@ -26,12 +26,23 @@ function sendQuery(event) {
                         .sort((a, b) => response.scores[a] < response.scores[b] ? -1 : (response.scores[b] < response.scores[a]) | 0).reverse();
 
                     console.log(idxs);
-                    document.getElementById("output1").textContent = paragraphs[idxs[0]];
-                    document.getElementById('output1').addEventListener('click', function () {
-                        scrollOnPage(idxs[0]);
-                    });
 
-                    document.getElementById("output2").textContent = paragraphs[idxs[1]];
+                    if (response.scores[idxs[0]] != 0) {
+                        document.getElementById("output1").textContent = paragraphs[idxs[0]];
+                        document.getElementById('output1').addEventListener('click', function () {
+                            scrollOnPage(idxs[0]);
+                        });
+
+                        document.getElementById("output2").textContent = paragraphs[idxs[1]];
+                        document.getElementById('output2').addEventListener('click', function () {
+                            scrollOnPage(idxs[1]);
+                        });
+
+                        document.getElementById("output3").textContent = paragraphs[idxs[2]];
+                        document.getElementById('output3').addEventListener('click', function () {
+                            scrollOnPage(idxs[2]);
+                        });
+                    }
                 });
             });
         }
