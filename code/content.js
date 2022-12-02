@@ -226,6 +226,126 @@ class BM25 {
         return w;
     }
     })();
+
+    /**
+     * Sets M: numDocs
+     * Sets avgdl: averageDocLength based on all the docs' lengths
+     */
+    setupBM25DocInfo() {
+        this.numDocs = this.cleanedParagraphs.length;
+    
+        var docLengths = [];
+        this.cleanedParagraphs.forEach(doc => {
+            docLengths.push(doc.length);
+        })
+    
+        this.avgDocLength = docLengths.reduce((a, b) => a + b) / docLengths.length;
+    }
+
+    /**
+     * vocabulary is set of all unique words in all paragraphs
+     */
+    getVocabulary() {
+        var vocabSet = new Set();
+        this.cleanedParagraphs.forEach(doc => {
+        doc.forEach(word => {
+            vocabSet.add(word);
+        })
+        });
+        this.vocabulary = Array.from(vocabSet);
+    }
+
+    /**
+     * To find c(w,d), do BM25.docFrequency[docIndex][wordIndex from vocabulary]
+     * c(w,d) is count of that word in the current document
+     */
+    getDocFrequency() {
+        var tmp = [];
+        this.cleanedParagraphs.forEach(doc => {
+            var freq = []
+            this.vocabulary.forEach(term => {
+                var count = 0;
+                doc.forEach(word => {
+                    if (term == word) count++;
+                })
+                freq.push(count);
+            })
+            tmp.push(freq);
+        });
+        this.docFrequency = tmp;
+    }
+
+    /**
+     * For every word in vocab, we have the count of documents that word occurs in
+     * df(w): termDocFrequency[vocabIndex]
+     */
+    getTermDocFrequency() {
+        var tmp = [];
+        var docFreq = this.docFrequency;
+        for (let i = 0; i < this.vocabulary.length; i++) {
+            var termDocFreq = 0;
+            for (let j = 0; j < this.numDocs; j++) {
+                termDocFreq += docFreq[j][i];
+            }
+            tmp.push(termDocFreq);
+        }
+        this.termDocFrequency = tmp;
+    }
+
+    /**
+     * This calculates c(w,q), to be used in BM25
+     * Count of word in the query
+     */
+    getQueryTermFrequency(term, query) {
+        var freq = 0;
+        queryWords = query.split(' ');
+        queryWords.forEach(word => {
+            if (word == term) freq++;
+        })
+        return freq;
+    }
+
+    /**
+     * This computes BM25 score for a given paragraph based on the query
+     * @param {User entered search} query 
+     * @param {Paragraph to assign score for} doc 
+     * @param {*} b 
+     * @param {*} k1 
+     * @param {*} k3 
+     */
+    getBM25ForDocument(query, doc, b, k) {
+        var queryWords = query.split(' ');
+        var bm25Score = 0;
+        var docLen = doc.length;
+        var avgdl = this.avgDocLength;
+        for (let i = 0; i < docLen; i++) {
+            for (let j = 0; j < queryWords.length; j++) {
+                if (doc[i] == queryWords[j]) {
+                var wordVocabIndex = this.vocabulary.indexOf(doc[i]);
+                var countWordQuery = this.getQueryTermFrequency(doc[i], query); // c(w,q)
+                var countWordDoc = this.docFrequency[i][wordVocabIndex]; // c(w,d)
+                var dfw = this.termDocFrequency[wordVocabIndex]; // df(w)
+        
+                bm25Score += countWordQuery * (((k+1) * countWordDoc) / (countWordDoc + (k * (1 - b + ((b * docLen)/avgdl))))) * Math.log2((numDocs + 1)/dfw); // f(q,d)
+                }
+            }
+        }
+        return bm25Score;
+    }
+
+    /**
+     * Main function that runs the bm25 algorithm
+     * @param {User entered search} query 
+     * @param {*} b 
+     * @param {*} k 
+     */
+    doBM25(query, b, k) {
+        var tmp = [];
+        this.cleanedParagraphs.forEach(doc => {
+            tmp.push(this.getBM25ForDocument(query, doc, b, k));
+        })
+        this.bm25Scores = tmp;
+    }
 }
 
 let bm25_ranker = new BM25();
@@ -244,13 +364,13 @@ chrome.runtime.sendMessage({method: "set"}, () => {
           bm25_ranker.paragraphs = response.value;
           console.log("paragraphs:", bm25_ranker.paragraphs);
           bm25_ranker.cleanText(bm25_ranker.paragraphs);
-          setupBM25DocInfo();
+          bm25_ranker.setupBM25DocInfo();
 
-          getVocabulary();
+          bm25_ranker.getVocabulary();
           console.log("vocabulary:", bm25_ranker.vocabulary);
-          getDocFrequency();
+          bm25_ranker.getDocFrequency();
           console.log("doc frequency:", bm25_ranker.docFrequency);
-          getTermDocFrequency();
+          bm25_ranker.getTermDocFrequency();
           console.log("term doc frequency:", bm25_ranker.termDocFrequency);
 
           // Now calculate the bm25 for the text
@@ -274,124 +394,4 @@ function getParagraphs() {
 
   chrome.runtime.sendMessage({ method: "set", value: paragraphs }, () => {
   });
-}
-
-/**
- * Sets M: numDocs
- * Sets avgdl: averageDocLength based on all the docs' lengths
- */
-function setupBM25DocInfo() {
-  bm25_ranker.numDocs = bm25_ranker.cleanedParagraphs.length;
-
-  var docLengths = [];
-  bm25_ranker.cleanedParagraphs.forEach(doc => {
-    docLengths.push(doc.length);
-  })
-
-  bm25_ranker.avgDocLength = mean(docLengths);
-}
-
-/**
- * vocabulary is set of all unique words in all paragraphs
- */
-function getVocabulary() {
-  var vocabSet = new Set();
-  bm25_ranker.cleanedParagraphs.forEach(doc => {
-    doc.forEach(word => {
-      vocabSet.add(word);
-    })
-  });
-  bm25_ranker.vocabulary = Array.from(vocabSet);
-}
-
-/**
- * To find c(w,d), do BM25.docFrequency[docIndex][wordIndex from vocabulary]
- * c(w,d) is count of that word in the current document
- */
-function getDocFrequency() {
-  var tmp = [];
-  bm25_ranker.cleanedParagraphs.forEach(doc => {
-    var freq = []
-    bm25_ranker.vocabulary.forEach(term => {
-      var count = 0;
-      doc.forEach(word => {
-        if (term == word) count++;
-      })
-      freq.push(count);
-    })
-    tmp.push(freq);
-  });
-  bm25_ranker.docFrequency = tmp;
-}
-
-/**
- * This calculates c(w,q), to be used in BM25
- * Count of word in the query
- */
-function getQueryTermFrequency(term, query) {
-  var freq = 0;
-  queryWords = query.split(' ');
-  queryWords.forEach(word => {
-    if (word == term) freq++;
-  })
-  return freq;
-}
-
-/**
- * For every word in vocab, we have the count of documents that word occurs in
- * df(w): termDocFrequency[vocabIndex]
- */
-function getTermDocFrequency() {
-  var tmp = [];
-  docFreq = bm25_ranker.docFrequency;
-  for (let i = 0; i < bm25_ranker.vocabulary.length; i++) {
-    var termDocFreq = 0;
-    for (let j = 0; j < bm25_ranker.numDocs; j++) {
-      termDocFreq += docFreq[j][i];
-    }
-    tmp.push(termDocFreq);
-  }
-  bm25_ranker.termDocFrequency = tmp;
-}
-
-/**
- * Main function that runs the bm25 algorithm
- * @param {User entered search} query 
- * @param {*} b 
- * @param {*} k 
- */
-function doBM25(query, b, k) {
-  var tmp = [];
-  bm25_ranker.cleanedParagraphs.forEach(doc => {
-    tmp.push(getBM25ForDocument(query, doc, b, k));
-  })
-  bm25_ranker.bm25Scores = tmp;
-}
-
-/**
- * This computes BM25 score for a given paragraph based on the query
- * @param {User entered search} query 
- * @param {Paragraph to assign score for} doc 
- * @param {*} b 
- * @param {*} k1 
- * @param {*} k3 
- */
-function getBM25ForDocument(query, doc, b, k) {
-  var queryWords = query.split(' ');
-  var bm25Score = 0;
-  var docLen = doc.length;
-  var avgdl = bm25_ranker.avgDocLength;
-  for (let i = 0; i < docLen; i++) {
-    for (let j = 0; j < queryWords.length; j++) {
-      if (doc[i] == queryWords[j]) {
-        var wordVocabIndex = bm25_ranker.vocabulary.indexOf(doc[i]);
-        var countWordQuery = getQueryTermFrequency(doc[i], query); // c(w,q)
-        var countWordDoc = bm25_ranker.docFrequency[i][wordVocabIndex]; // c(w,d)
-        var dfw = bm25_ranker.termDocFrequency[wordVocabIndex]; // df(w)
-
-        bm25Score += countWordQuery * (((k+1) * countWordDoc) / (countWordDoc + (k * (1 - b + ((b * docLen)/avgdl))))) * Math.log2((numDocs + 1)/dfw); // f(q,d)
-      }
-    }
-  }
-  return bm25Score;
 }
