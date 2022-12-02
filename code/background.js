@@ -8,6 +8,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.method == "get") {
     sendResponse({value: value})
   }
-  
+
   return true;
 });

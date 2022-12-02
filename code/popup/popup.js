@@ -7,3 +7,15 @@ function handleSubmit(event) {
 }
 
 document.getElementById('form').addEventListener('submit', handleSubmit);
+
+function sendQuery() {
+    var query = document.getElementById("query").vaue;
+    chrome.tabs.query(
+        {currentWindow: true, active: true},
+        function(tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {query: query});
+        }
+    )
+}
+
+document.getElementById("submitButton").addEventListener("click", sendQuery);

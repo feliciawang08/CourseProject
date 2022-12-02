@@ -5,7 +5,9 @@
     "description": "Use BM25 algorithm to search Wikipedia articles or PDFs based on user-inputted phrase.",
     "permissions": [
         "activeTab",
-        "scripting"
+        "scripting",
+        "storage",
+        "tabs"
     ],
     "host_permissions": [
         "https://*.wikipedia.org/*"

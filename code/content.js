@@ -14,6 +14,19 @@ class BM25 {
   }
 
   /**
+   * One function that will call all necessary functions to fill above parameters
+   */
+  processParagraphs() {
+    bm25_ranker.setupBM25DocInfo();
+    bm25_ranker.getVocabulary();
+    console.log("vocabulary:", bm25_ranker.vocabulary);
+    bm25_ranker.getDocFrequency();
+    console.log("doc frequency:", bm25_ranker.docFrequency);
+    bm25_ranker.getTermDocFrequency();
+    console.log("term doc frequency:", bm25_ranker.termDocFrequency);
+  }
+
+  /**
    * Filters out stopwords and stems resulting list from Wikipedia article paragraphs String
    * @param {Array containing strings of all Wikipedia article paragraphs} paras 
    */
@@ -341,9 +354,11 @@ class BM25 {
      */
     doBM25(query, b, k) {
         var tmp = [];
+        console.log(query);
         this.cleanedParagraphs.forEach(doc => {
             tmp.push(this.getBM25ForDocument(query, doc, b, k));
         })
+        console.log("doBM25 called");
         this.bm25Scores = tmp;
     }
 }
@@ -361,17 +376,11 @@ chrome.runtime.sendMessage({method: "set"}, () => {
         document.getElementById("id_text").value = "This extension can only be run on Wikipedia articles.";
       } else {
         chrome.runtime.sendMessage({ method: "get" }, (response) => {
+            console.log(response);
           bm25_ranker.paragraphs = response.value;
           console.log("paragraphs:", bm25_ranker.paragraphs);
           bm25_ranker.cleanText(bm25_ranker.paragraphs);
-          bm25_ranker.setupBM25DocInfo();
-
-          bm25_ranker.getVocabulary();
-          console.log("vocabulary:", bm25_ranker.vocabulary);
-          bm25_ranker.getDocFrequency();
-          console.log("doc frequency:", bm25_ranker.docFrequency);
-          bm25_ranker.getTermDocFrequency();
-          console.log("term doc frequency:", bm25_ranker.termDocFrequency);
+          bm25_ranker.processParagraphs();
 
           // Now calculate the bm25 for the text
           // doBM25(query, b, k); // uncomment when we get the query input variable
@@ -380,6 +389,16 @@ chrome.runtime.sendMessage({method: "set"}, () => {
     });
   });
 });
+
+/**
+ * Listen for search button press from popup with query
+ */
+chrome.runtime.onMessage.addListener(message => {
+    if (message.query) {
+        console.log("query");
+        bm25_ranker.doBM25(message.query, 0.75, 1.0);
+    }
+})
 
 /**
  * Each paragraph is a document. (M total documents, each document is 'd')
