@@ -8,17 +8,14 @@ function handleSubmit(event) {
 
 document.getElementById('form').addEventListener('submit', handleSubmit);
 
-function sendQuery() {
-    var query = document.getElementById("query").value;
-    chrome.tabs.query(
-        {currentWindow: true, active: true},
-        function(tabs) {
-            console.log(query);
-            chrome.tabs.sendMessage(tabs[0].id, {query: query});
-        }
-    )
-}
+const submitButton = document.getElementById("submitButton");
+submitButton.onclick = async function(e) {
+    let queryOptions = {active: true, currentWindow: true};
+    let tabs = await chrome.tabs.query(queryOptions);
 
-document.addEventListener("DOMContentLoaded", function() {
-    document.getElementById("submitButton").addEventListener("click", sendQuery);
-})
+    chrome.tabs.sendMessage(
+        tabs[0].id,
+        {query: document.getElementById("query").value}
+    )
+    console.log("Clicked");
+}

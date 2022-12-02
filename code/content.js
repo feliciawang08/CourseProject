@@ -1,4 +1,3 @@
-// BM25 code will go here
 console.log("This page runs");
 
 class BM25 {
@@ -393,11 +392,12 @@ chrome.runtime.sendMessage({method: "set"}, () => {
 /**
  * Listen for search button press from popup with query
  */
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    console.log(msg);
-    bm25_ranker.doBM25(msg.query, 0.75, 1.0);
-    sendResponse();
-    return true;
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    console.log("???");
+    if (request.query && request.query.length > 0) {
+        console.log(request.query);
+        bm25_ranker.doBM25(request.query, 0.75, 1.0);
+    }
 })
 
 /**
