@@ -328,24 +328,24 @@ class BM25 {
    * @param {*} k1 
    * @param {*} k3 
    */
-  getBM25ForDocument(query, doc, b, k) {
+  getBM25ForDocument(query, doc, b, k, idx) {
     var queryWords = query.split(' ');
     var bm25Score = 0;
     var docLen = doc.length;
     var avgdl = this.avgDocLength;
+    console.log("doc len: ", docLen);
     for (let i = 0; i < docLen; i++) {
       for (let j = 0; j < queryWords.length; j++) {
         if (doc[i] == queryWords[j]) {
           var wordVocabIndex = this.vocabulary.indexOf(doc[i]);
           var countWordQuery = this.getQueryTermFrequency(doc[i], query); // c(w,q)
-          var countWordDoc = this.docFrequency[i][wordVocabIndex]; // c(w,d)
+          var countWordDoc = this.docFrequency[idx][wordVocabIndex]; // c(w,d)
           var dfw = this.termDocFrequency[wordVocabIndex]; // df(w)
-
           bm25Score += countWordQuery * (((k + 1) * countWordDoc) / (countWordDoc + (k * (1 - b + ((b * docLen) / avgdl))))) * Math.log2((this.numDocs + 1) / dfw); // f(q,d)
         }
       }
     }
-    console.log(bm25Score);
+    // console.log(bm25Score);
     return bm25Score;
   }
 
@@ -359,8 +359,10 @@ class BM25 {
     var tmp = [];
     console.log(query);
     console.log(this.cleanedParagraphs[0]);
+    var idx = 0;
     this.cleanedParagraphs.forEach(doc => {
-      tmp.push(this.getBM25ForDocument(query, doc, b, k));
+      tmp.push(this.getBM25ForDocument(query, doc, b, k, idx));
+      idx++;
     })
     console.log("doBM25 called");
     this.bm25Scores = tmp;
