@@ -2,26 +2,90 @@
 /* .input {
     border-radius: 3px;
 } */
+@import url('https://fonts.googleapis.com/css2?family=Lato&family=Roboto:wght@400;700&display=swap');
+
+html * {
+    font-family: 'Loto', sans-serif;
+}
 
 .results {
     font-size: 16px;
     padding: 5px;
 }
 
+h1 {
+    text-align: center;
+    color: salmon;
+}
+
+h2 {
+    text-align: center;
+    color: salmon;
+    margin-bottom: 0;
+}
 
 th,
 td:hover {
-    border: 1px solid rgb(0, 0, 0);
+    border: 1px solid salmon;
+    border-radius: 5px;
     cursor: pointer;
+    padding: 1px;
 }
 
 th,
 td {
     border: 1px solid rgb(255, 249, 251);
+    transition: border 0.5s;
 }
 
 body {
     width: 20rem;
     height: 3rem;
-    background-color: rgb(255, 249, 251);
+    background-color: #FFF4F2;
+}
+
+.c-form {
+    padding: 1px;
+    position: relative;
+    display: flex;
+  }
+  
+.searchInput {
+    border: none;
+    outline: none;
+    border-radius: 5em;
+    box-sizing: border-box;
+    transition: box-shadow .5s;
+    color: salmon;
+    padding: 10px 100px 10px 20px;
+    width: 100%;
+}
+
+.searchInput:hover {
+    box-shadow: 0 0 11px rgba(250, 128, 114, 0.5); 
+}
+
+.searchButton {
+    position: absolute;
+    border: none;
+    background: linear-gradient(90deg, salmon, transparent) #e91e63;
+    color:white;
+    border-radius: 5em;
+    right: 3px;
+    top: 3px;
+    bottom: 3px;
+    padding: 0 10px;
+    transition: background-color 0.3s;
+}
+
+.searchButton:hover, .searchButton:focus {
+    background-color: orange;
+}
+
+::placeholder {
+    color: salmon;
+}
+
+.searchButton:hover {
+    cursor: pointer;
 }

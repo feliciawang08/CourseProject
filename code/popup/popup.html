@@ -3,11 +3,18 @@
 <script type="module" src="popup.js"></script>
 <script src="../content.js"></script>
 
+<h1>BM25 Document Search</h1>
 <form class="input" role="search" id="form">
-    <input type="search" id="query" placeholder="Search...">
+    <!-- <input type="search" id="query" placeholder="Search...">
     <button id="submitButton">
         submit
-    </button>
+    </button> -->
+    <div class="c-form">
+        <input class="searchInput" placeholder="Search..." id="query">
+        <button class="searchButton" id="submitButton">
+            Submit
+        </button>
+    </div>
 </form>
 
 <div>
@@ -15,6 +22,7 @@
     <script src="/content.js"></script>
 </div>
 
+<h2>Results:</h2>
 <table class="results">
     <tr>
         <td><span id="output1">
