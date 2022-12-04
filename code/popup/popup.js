@@ -51,8 +51,14 @@ function sendQuery(event) {
                         document.getElementById("output1").textContent = "";
 
                         document.getElementById("output2").textContent = "";
+                        document.getElementById('output2').removeEventListener('click', function () {
+                            scrollOnPage(idxs[1]);
+                        });
 
                         document.getElementById("output3").textContent = "";
+                        document.getElementById('output3').removeEventListener('click', function () {
+                            scrollOnPage(idxs[2]);
+                        });
                     }
                 });
             });
