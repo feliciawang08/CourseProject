@@ -16,6 +16,14 @@ html * {
 h1 {
     text-align: center;
     color: salmon;
+    padding-bottom: 0;
+}
+
+h3 {
+    text-align: center;
+    color: salmon;
+    padding: 0;
+    font-weight: normal;
 }
 
 h2 {
