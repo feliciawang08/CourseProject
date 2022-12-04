@@ -42,6 +42,12 @@ function sendQuery(event) {
                         document.getElementById('output3').addEventListener('click', function () {
                             scrollOnPage(idxs[2]);
                         });
+                    } else {
+                        document.getElementById("output1").textContent = "No Results";
+
+                        document.getElementById("output2").textContent = "";
+
+                        document.getElementById("output3").textContent = "";
                     }
                 });
             });
