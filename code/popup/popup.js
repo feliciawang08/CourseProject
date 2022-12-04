@@ -43,7 +43,12 @@ function sendQuery(event) {
                             scrollOnPage(idxs[2]);
                         });
                     } else {
-                        document.getElementById("output1").textContent = "No Results";
+                        const para = document.createElement("h3");
+                        const node = document.createTextNode("No Results");
+                        para.appendChild(node);
+                        const element = document.getElementById("div1");
+                        element.appendChild(para);
+                        document.getElementById("output1").textContent = "";
 
                         document.getElementById("output2").textContent = "";
 
